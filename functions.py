@@ -28,3 +28,18 @@ def starts(screen):
     # отрисовка картинок на экране
     screen.blit(image, (0, 0))
     screen.blit(image_text, (0, -25))
+
+# функция, проверяющая столкновения мячика
+def collisions(ball):
+    # проверка столкновения мяча с верхней границей
+    if ball.rect.top <= 50:
+        ball.vy = 2
+        ball.vx = -2 if ball.vx < 0 else 2
+    # проверка столкновения мяча с левой границей
+    if ball.rect.left <= 0:
+        ball.vx = 2
+        ball.vy = -2 if ball.vy < 0 else 2
+    # проверка столкновения мяча с правой границей
+    elif ball.rect.right >= 750:
+        ball.vx = -2
+        ball.vy = -2 if ball.vy < 0 else 2

@@ -1,5 +1,5 @@
 import pygame
-
+from random import choice
 
 # класс доски
 class Board(pygame.sprite.Sprite):
@@ -31,3 +31,24 @@ class Board(pygame.sprite.Sprite):
                             self.rect = self.rect.move(5, 0)
             else:
                 self.rect.x = pos if pos < 690 else 690
+
+
+# класс мячика
+class Ball(pygame.sprite.Sprite):
+    def __init__(self, ball_sprite):
+        super().__init__(ball_sprite)
+        # создание мячика внутри квадрата
+        self.image = pygame.Surface((10, 10))
+        pygame.draw.rect(self.image, (219, 112, 147), (0, 0, 10, 10))
+        pygame.draw.circle(self.image, (255, 255, 255), (5, 5), 5)
+        self.rect = self.image.get_rect()
+        self.rect.x = 370
+        self.rect.y = 750
+        self.vx = choice([-2, 2])
+        self.vy = -2
+        self.is_paused = False
+
+    # функция, осуществляющая перемещение шарика
+    def update(self):
+        self.rect = self.rect.move(self.vx, self.vy)
+

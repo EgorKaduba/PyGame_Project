@@ -4,6 +4,8 @@ from classes import *
 
 # создаём группы спрайтов
 board_sprite = pygame.sprite.Group()
+ball_sprite = pygame.sprite.Group()
+
 
 # инициализация pygame
 pygame.init()
@@ -34,10 +36,11 @@ while running:
         # начать игру, если нажали кнопку 'S'
         if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
             if not start:
+                ball = Ball(ball_sprite)
                 board = Board(board_sprite, left, r)
                 start = True
                 dvij = True
-                all_sprites.add(board_sprite)
+                all_sprites.add(board_sprite, ball_sprite)
         if dvij:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
                 board.left = True
@@ -50,8 +53,13 @@ while running:
             elif event.type == pygame.MOUSEMOTION:
                 board.update(event.pos[0])
     if dvij:
+        # проверка столкновений
+        collisions(ball)
         # передвижение доски
         board.update()
+        # передвижение мячика
+        ball.update()
+        pygame.draw.line(screen, (128, 128, 128), (0, 47), (750, 47), 3)
     else:
         # вывод на экран инструции до старта
         starts(screen)
