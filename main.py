@@ -49,8 +49,6 @@ while running:
                 board.right = True
             elif event.type == pygame.MOUSEMOTION:
                 board.update(event.pos[0])
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                ball.is_paused = False
     if dvij:
         # передвижение доски
         board.update()
