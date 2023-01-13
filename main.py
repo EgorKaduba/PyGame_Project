@@ -6,7 +6,6 @@ from classes import *
 board_sprite = pygame.sprite.Group()
 ball_sprite = pygame.sprite.Group()
 
-
 # инициализация pygame
 pygame.init()
 # создание экрана
@@ -54,7 +53,7 @@ while running:
                 board.update(event.pos[0])
     if dvij:
         # проверка столкновений
-        collisions(ball)
+        collisions(ball, board, board_sprite)
         # передвижение доски
         board.update()
         # передвижение мячика

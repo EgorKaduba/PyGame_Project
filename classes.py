@@ -1,6 +1,7 @@
 import pygame
 from random import choice
 
+
 # класс доски
 class Board(pygame.sprite.Sprite):
     def __init__(self, board_sprite, left, r):
@@ -51,4 +52,3 @@ class Ball(pygame.sprite.Sprite):
     # функция, осуществляющая перемещение шарика
     def update(self):
         self.rect = self.rect.move(self.vx, self.vy)
-
