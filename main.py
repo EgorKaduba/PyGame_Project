@@ -1,6 +1,5 @@
-import pygame
-from functions import *
 from classes import *
+from functions import *
 
 # создаём группы спрайтов
 board_sprite = pygame.sprite.Group()
@@ -17,6 +16,9 @@ pygame.display.set_caption('Арканоид')
 # создание группы, в которой будут находиться все спрайты
 all_sprites = pygame.sprite.Group()
 # создание переменных для последовательной работы игры
+star = pygame.transform.scale(load_image('star.png', -1), (100, 50))
+fon = pygame.transform.scale(load_image('fon2.jpg'), (750, 850))
+heart = pygame.transform.scale(load_image('heart.jpg', -1), (65, 47))
 start = False
 left = False
 r = False
@@ -24,6 +26,7 @@ dvij = False
 clock = pygame.time.Clock()
 fps = 150
 running = True
+dead = 0
 
 # основной цикл игры
 while running:
@@ -39,7 +42,7 @@ while running:
                 board = Board(board_sprite, left, r)
                 start = True
                 dvij = True
-                all_sprites.add(board_sprite, ball_sprite)
+                all_sprites.add(Background(fon), board_sprite, ball_sprite)
         if dvij:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
                 board.left = True
@@ -53,11 +56,13 @@ while running:
                 board.update(event.pos[0])
     if dvij:
         # проверка столкновений
-        collisions(ball, board, board_sprite)
+        dead = collisions(ball, board, board_sprite, dead, screen, clock, fps)
         # передвижение доски
         board.update()
         # передвижение мячика
         ball.update()
+        # отображение жизней
+        score_dead_count(dead, screen, heart)
         pygame.draw.line(screen, (128, 128, 128), (0, 47), (750, 47), 3)
     else:
         # вывод на экран инструции до старта

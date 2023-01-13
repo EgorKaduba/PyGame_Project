@@ -1,5 +1,7 @@
 import os
 import pygame
+import sys
+from random import choice
 
 
 # функция, загружающая картинку
@@ -31,7 +33,7 @@ def starts(screen):
 
 
 # функция, проверяющая столкновения мячика
-def collisions(ball, board, board_sprite):
+def collisions(ball, board, board_sprite, dead, screen, clock, fps):
     # проверка столкновения мяча с верхней границей
     if ball.rect.top <= 50:
         ball.vy = 2
@@ -79,3 +81,61 @@ def collisions(ball, board, board_sprite):
                 ball.vy = -1
             elif ball.rect.x in range(board.rect.x + 46, board.rect.x + 77) and ball.vx < 0:
                 ball.vy = -3
+    # проверка на проигрыш
+    if ball.rect.y >= 850:
+        dead += 1
+        if dead < 3:
+            ball.rect.x = 370
+            ball.rect.y = 750
+            ball.vy = choice([-1, -2, -3])
+        elif dead == 3:
+            score, dead = gameover(screen, ball, fps, clock)
+    return dead
+
+
+# счетчик смертей
+def score_dead_count(dead, screen, heart):
+    if int(dead) == 0:
+        screen.blit(heart, (660, 2))
+        screen.blit(heart, (600, 2))
+        screen.blit(heart, (540, 2))
+    if int(dead) == 1:
+        screen.blit(heart, (600, 2))
+        screen.blit(heart, (660, 2))
+    if int(dead) == 2:
+        screen.blit(heart, (660, 2))
+
+
+# функция, работающая после проигрыша
+def gameover(screens, ball, fps, clock):
+    # открываем картинку
+    fons = pygame.transform.scale(load_image('gameover.png'), (750, 850))
+    # выводим её на экран
+    screens.blit(fons, (0, 0))
+    # ждём, пока пользовател не нажмет на R для рестарта
+    c = True
+    while c:
+        for events in pygame.event.get():
+            if events.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif events.type == pygame.KEYDOWN and events.key == pygame.K_r:
+                locals()
+                c = False
+                ball.rect.x = 370
+                ball.rect.y = 750
+                ball.vy = -2
+                score = '000'
+                return score, 0
+        # вывод надписи-инструкции
+        pygame.display.flip()
+        clock.tick(fps)
+        text = 'Нажмите R для рестарта'
+        font = pygame.font.Font(None, 50)
+        top = 725
+        str_ren = font.render(text, 1, pygame.Color('white'))
+        str_rect = str_ren.get_rect()
+        str_rect.top = top
+        str_rect.left = 150
+        screens.blit(str_ren, str_rect)
+    return

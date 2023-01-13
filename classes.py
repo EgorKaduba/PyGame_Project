@@ -52,3 +52,11 @@ class Ball(pygame.sprite.Sprite):
     # функция, осуществляющая перемещение шарика
     def update(self):
         self.rect = self.rect.move(self.vx, self.vy)
+
+# класс фона
+class Background(pygame.sprite.Sprite):
+    def __init__(self, image):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = 0, 0
