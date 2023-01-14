@@ -18,9 +18,6 @@ pygame.display.set_caption('Арканоид')
 # создание группы, в которой будут находиться все спрайты
 all_sprites = pygame.sprite.Group()
 # создание переменных для последовательной работы игры
-star = pygame.transform.scale(load_image('star.png', -1), (100, 50))
-fon = pygame.transform.scale(load_image('fon2.jpg'), (750, 850))
-heart = pygame.transform.scale(load_image('heart.jpg', -1), (65, 47))
 start = False
 left = False
 r = False
@@ -29,7 +26,13 @@ clock = pygame.time.Clock()
 fps = 150
 running = True
 dead = 0
-
+score = '000'
+list_of_maps = ['map.map']
+current_level = list_of_maps[0]
+# загрузка картинок
+star = pygame.transform.scale(load_image('star.png', -1), (100, 50))
+fon = pygame.transform.scale(load_image('fon2.jpg'), (750, 850))
+heart = pygame.transform.scale(load_image('heart.jpg', -1), (65, 47))
 # основной цикл игры
 while running:
     # перебор всех сигналов
@@ -42,7 +45,7 @@ while running:
             if not start:
                 ball = Ball(ball_sprite)
                 board = Board(board_sprite, left, r)
-                karta('map.map', stens_sprite, karta_sprites, block_sprite)
+                maps('map.map', stens_sprite, karta_sprites, block_sprite)
                 start = True
                 dvij = True
                 all_sprites.add(Background(fon), board_sprite, ball_sprite)
@@ -64,15 +67,22 @@ while running:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 ball.is_paused = False
     if dvij:
+        # проверка столкновений мячика с стенами
+        ball.vx, ball.vy = collide_stena(ball, stens_sprite)
+        # проверка столкновений мячика с блоками
+        ball.vx, ball.vy, score = collide_block(ball, block_sprite, score)
         # проверка столкновений
-        dead = collisions(ball, board, board_sprite, dead, screen, clock, fps)
+        score, dead = collisions(screen, ball, board, board_sprite, clock, fps, dead, karta_sprites, stens_sprite,
+                                 block_sprite, score, current_level)
         # передвижение доски
         board.update()
         # передвижение мячика
         ball.update()
         # отображение жизней
-        score_dead_count(dead, screen, heart)
+        score_dead_count(dead, screen, heart, score, star)
         pygame.draw.line(screen, (128, 128, 128), (0, 47), (750, 47), 3)
+        score, dead, current_level = win(screen, list_of_maps, block_sprite, current_level, ball, score, stens_sprite,
+                                         karta_sprites, dead)
     else:
         # вывод на экран инструции до старта
         starts(screen)

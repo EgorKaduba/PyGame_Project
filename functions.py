@@ -32,7 +32,8 @@ def starts(screen):
 
 
 # функция, проверяющая столкновения мячика
-def collisions(ball, board, board_sprite, dead, screen, clock, fps):
+def collisions(screen, ball, board, board_sprite, clock, fps, dead, karta_sprites, stens_sprite, block_sprite, score,
+               current_level):
     # проверка столкновения мяча с верхней границей
     if ball.rect.top <= 50:
         ball.vy = 2
@@ -89,12 +90,24 @@ def collisions(ball, board, board_sprite, dead, screen, clock, fps):
             ball.rect.y = 750
             ball.vy = choice([-1, -2, -3])
         elif dead == 3:
-            score, dead = gameover(screen, ball, fps, clock)
-    return dead
+            score, dead = gameover(screen, clock, fps, ball, karta_sprites, stens_sprite, block_sprite, score,
+                                   current_level)
+    return score, dead
 
 
 # счетчик смертей
-def score_dead_count(dead, screen, heart):
+def score_dead_count(dead, screen, heart, score, star):
+    # отрисовка границ
+    pygame.draw.rect(screen, pygame.Color('orange'), (-3, -3, 150, 50), 3)
+    screen.blit(star, (67, -3))
+    # вывод счёта
+    text = score
+    font = pygame.font.Font(None, 70)
+    str_ren = font.render(text, 1, pygame.Color('yellow'))
+    str_rect = str_ren.get_rect()
+    str_rect.x = 5
+    str_rect.y = 0
+    screen.blit(str_ren, str_rect)
     if int(dead) == 0:
         screen.blit(heart, (660, 2))
         screen.blit(heart, (600, 2))
@@ -107,7 +120,7 @@ def score_dead_count(dead, screen, heart):
 
 
 # функция, работающая после проигрыша
-def gameover(screens, ball, fps, clock):
+def gameover(screens, clock, fps, ball, karta_sprites, stens_sprite, block_sprite, score, current_level):
     # открываем картинку
     fons = pygame.transform.scale(load_image('gameover.png'), (750, 850))
     # выводим её на экран
@@ -125,20 +138,31 @@ def gameover(screens, ball, fps, clock):
                 ball.rect.x = 370
                 ball.rect.y = 750
                 ball.vy = -2
-                score = '000'
                 ball.is_paused = True
+                score = '000'
+                for i in block_sprite:
+                    i.kill()
+                for i in stens_sprite:
+                    i.kill()
+                maps(current_level, stens_sprite, karta_sprites, block_sprite)
                 return score, 0
         # вывод надписи-инструкции
         pygame.display.flip()
         clock.tick(fps)
         text = 'Нажмите R для рестарта'
+        text_score = f'Ваш результат: {int(score)}'
         font = pygame.font.Font(None, 50)
         top = 725
+        str_ren_score = font.render(text_score, 1, pygame.Color('yellow'))
         str_ren = font.render(text, 1, pygame.Color('white'))
         str_rect = str_ren.get_rect()
         str_rect.top = top
         str_rect.left = 150
         screens.blit(str_ren, str_rect)
+        str_rects = str_ren_score.get_rect()
+        str_rects.top = 100
+        str_rects.left = 200
+        screens.blit(str_ren_score, str_rects)
     return
 
 
@@ -155,7 +179,7 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-def karta(level_map, stens_sprite, karta_sprites, block_sprite):
+def maps(level_map, stens_sprite, karta_sprites, block_sprite):
     level_map = load_level(level_map)
     count_y = 0
     count_x = 0
@@ -200,3 +224,152 @@ def switch_paused(ball, board, screen):
                 c = False
         pygame.display.flip()
         screen.blit(str_ren, str_rect)
+
+
+# функция, проверяющая столкновения мячика и блоков
+def collide_block(ball, block_sprite, score):
+    # перебор столкновений
+    hit = pygame.sprite.spritecollide(ball, block_sprite, False)
+    for i in hit:
+        if i.hp == 1:
+            score = scores(score)
+            if pygame.sprite.spritecollideany(ball, block_sprite):
+                # находим dx(дельту пересечения по х) и dy(дельта пересечения по у)
+                if ball.vx > 0:
+                    dx = ball.rect.right - i.rect.left
+                else:
+                    dx = i.rect.right - ball.rect.left
+                if ball.vy > 0:
+                    dy = ball.rect.bottom - i.rect.top
+                else:
+                    dy = i.rect.bottom - ball.rect.top
+                # изменяем направление полета шарика
+                if abs(dx - dy) < 3:
+                    ball.vx = -2 if ball.vx > 0 else 2
+                    ball.vy = -2 if ball.vy > 0 else 2
+                elif dx > dy:
+                    ball.vy = -2 if ball.vy > 0 else 2
+                else:
+                    ball.vx = -2 if ball.vx > 0 else 2
+                i.kill()
+            return ball.vx, ball.vy, score
+        else:
+            i.hp -= 1
+            if pygame.sprite.spritecollideany(ball, block_sprite):
+                # находим dx(дельту пересечения по х) и dy(дельта пересечения по у)
+                if ball.vx > 0:
+                    dx = ball.rect.right - i.rect.left
+                else:
+                    dx = i.rect.right - ball.rect.left
+                if ball.vy > 0:
+                    dy = ball.rect.bottom - i.rect.top
+                else:
+                    dy = i.rect.bottom - ball.rect.top
+                # изменяем направление полета шарика
+                if abs(dx - dy) < 5:
+                    ball.vx = -2 if ball.vx > 0 else 2
+                    ball.vy = -2 if ball.vy > 0 else 2
+                elif dx > dy:
+                    ball.vy = -2 if ball.vy > 0 else 2
+                else:
+                    ball.vx = -2 if ball.vx > 0 else 2
+            return ball.vx, ball.vy, score
+    return ball.vx, ball.vy, score
+
+
+# функция, проверяющая столкновения мячика со стенами
+def collide_stena(ball, stens_sprite):
+    # перебор столкновений мячика и стены
+    hit = pygame.sprite.spritecollide(ball, stens_sprite, False)
+    for i in hit:
+        if pygame.sprite.spritecollideany(ball, stens_sprite):
+            # находим dx(дельту пересечения по х) и dy(дельта пересечения по у)
+            if ball.vx > 0:
+                dx = ball.rect.right - i.rect.left
+            else:
+                dx = i.rect.right - ball.rect.left
+            if ball.vy > 0:
+                dy = ball.rect.bottom - i.rect.top
+            else:
+                dy = i.rect.bottom - ball.rect.top
+            # изменяем направление полета шарика
+            if abs(dx - dy) < 5:
+                ball.vx = -3 if ball.vx > 0 else 3
+                ball.vy = -1 if ball.vy > 0 else 1
+                return ball.vx, ball.vy
+            if dx > dy:
+                ball.vy = -2 if ball.vy > 0 else 2
+                return ball.vx, ball.vy
+            elif dx < dy:
+                ball.vx = -2 if ball.vx > 0 else 2
+                return ball.vx, ball.vy
+    return ball.vx, ball.vy
+
+
+def scores(score):
+    if int(score) < 9:
+        score = f'00{str(int(score) + 1)}'
+    elif (int(score)) >= 9 and (int(score) < 99):
+        score = f'0{str(int(score) + 1)}'
+    else:
+        score = str(int(score) + 1)
+    return score
+
+
+# функция, работающая при выигрыше
+# переход на новый уровень, если он есть
+def win(screen, list_of_maps, block_sprite, current_level, ball, score, stens_sprite, karta_sprites, dead):
+    locals()
+    # проверяем, последний ли это уровень
+    if current_level != list_of_maps[-1]:
+        # если все блоки разбиты, выводим картинку с поздравлением
+        if not len(block_sprite.sprites()):
+            # загружаем следующий уровень
+            level_map = list_of_maps[list_of_maps.index(current_level) + 1]
+            fon = pygame.Surface((750, 850), pygame.SRCALPHA, 32)
+            fon = fon.convert_alpha()
+            pygame.draw.rect(fon, (0, 0, 0, 120), (0, 0, 750, 850))
+            screen.blit(fon, (0, 0))
+            # загружаем победную картинку
+            image = pygame.transform.scale(load_image('win.jpg', -1), (750, 850))
+            c = True
+            while c:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    # если пользователь нажал на N, загружаем новый уровень и обновляем данные
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+                        c = False
+                        ball.rect.x = 370
+                        ball.rect.y = 750
+                        ball.vy = -2
+                        ball.is_paused = True
+                        score = '000'
+                        for i in block_sprite:
+                            i.kill()
+                        for i in stens_sprite:
+                            i.kill()
+                        maps(level_map, stens_sprite, karta_sprites, block_sprite)
+                        return score, 0, level_map
+                pygame.display.flip()
+                screen.blit(image, (30, -30))
+            return score, dead, level_map
+    # если это последний уровень, проверяем, разбиты ли все блоки, выводим победную картинку
+    else:
+        if not len(block_sprite.sprites()):
+            fon = pygame.Surface((750, 850), pygame.SRCALPHA, 32)
+            fon = fon.convert_alpha()
+            pygame.draw.rect(fon, (0, 0, 0, 120), (0, 0, 750, 850))
+            screen.blit(fon, (0, 0))
+            image = pygame.transform.scale(load_image('win.jpg', -1), (750, 850))
+            c = True
+            while c:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                pygame.display.flip()
+                screen.blit(image, (30, -30))
+    level_map = current_level
+    return score, dead, level_map
