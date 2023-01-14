@@ -1,7 +1,6 @@
 import os
-import pygame
 import sys
-from random import choice
+from classes import *
 
 
 # функция, загружающая картинку
@@ -85,6 +84,7 @@ def collisions(ball, board, board_sprite, dead, screen, clock, fps):
     if ball.rect.y >= 850:
         dead += 1
         if dead < 3:
+            ball.is_paused = True
             ball.rect.x = 370
             ball.rect.y = 750
             ball.vy = choice([-1, -2, -3])
@@ -126,6 +126,7 @@ def gameover(screens, ball, fps, clock):
                 ball.rect.y = 750
                 ball.vy = -2
                 score = '000'
+                ball.is_paused = True
                 return score, 0
         # вывод надписи-инструкции
         pygame.display.flip()
@@ -139,3 +140,63 @@ def gameover(screens, ball, fps, clock):
         str_rect.left = 150
         screens.blit(str_ren, str_rect)
     return
+
+
+def load_level(filename):
+    filename = "data/" + filename
+    # читаем уровень, убирая символы перевода строки
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+
+    # и подсчитываем максимальную длину
+    max_width = max(map(len, level_map))
+
+    # дополняем каждую строку пустыми клетками ('.')
+    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+
+
+def karta(level_map, stens_sprite, karta_sprites, block_sprite):
+    level_map = load_level(level_map)
+    count_y = 0
+    count_x = 0
+    for y in range(len(level_map)):
+        count_y += 1
+        for x in range(len(level_map[y])):
+            count_x += 1
+            if level_map[y][x] == '#':
+                stens_sprite.add(Stena(x, y, count_x, count_y))
+            elif level_map[y][x] == '*':
+                block_sprite.add(Block(x, y, 1, count_x, count_y))
+            elif level_map[y][x] == '$':
+                block_sprite.add(Block(x, y, 3, count_x, count_y))
+        count_x = 0
+    karta_sprites.add(stens_sprite, block_sprite)
+
+
+def switch_paused(ball, board, screen):
+    ball.is_paused = True
+    board.is_paused = True
+    image = pygame.Surface((750, 850), pygame.SRCALPHA, 32)
+    image = image.convert_alpha()
+    pygame.draw.rect(image, (0, 0, 0, 120), (0, 0, 750, 850))
+    screen.blit(image, (0, 0))
+    text = 'Нажмите SPACE для продолжения'
+    font = pygame.font.Font(None, 50)
+    top = 400
+    str_ren = font.render(text, 1, pygame.Color('yellow'))
+    str_rect = str_ren.get_rect()
+    str_rect.top = top
+    str_rect.left = 75
+    screen.blit(str_ren, str_rect)
+    c = True
+    while c:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                ball.is_paused = False
+                board.is_paused = False
+                c = False
+        pygame.display.flip()
+        screen.blit(str_ren, str_rect)

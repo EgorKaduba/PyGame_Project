@@ -1,9 +1,11 @@
-from classes import *
 from functions import *
 
 # создаём группы спрайтов
 board_sprite = pygame.sprite.Group()
 ball_sprite = pygame.sprite.Group()
+stens_sprite = pygame.sprite.Group()
+block_sprite = pygame.sprite.Group()
+karta_sprites = pygame.sprite.Group()
 
 # инициализация pygame
 pygame.init()
@@ -40,9 +42,14 @@ while running:
             if not start:
                 ball = Ball(ball_sprite)
                 board = Board(board_sprite, left, r)
+                karta('map.map', stens_sprite, karta_sprites, block_sprite)
                 start = True
                 dvij = True
                 all_sprites.add(Background(fon), board_sprite, ball_sprite)
+                ball.is_paused = True
+        if dvij and (event.type == pygame.KEYDOWN and event.key == pygame.K_p):
+            switch_paused(ball, board, screen)
+        # передвижение доски кнопками или мышкой
         if dvij:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
                 board.left = True
@@ -54,6 +61,8 @@ while running:
                 board.right = True
             elif event.type == pygame.MOUSEMOTION:
                 board.update(event.pos[0])
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                ball.is_paused = False
     if dvij:
         # проверка столкновений
         dead = collisions(ball, board, board_sprite, dead, screen, clock, fps)
@@ -71,6 +80,7 @@ while running:
     pygame.display.flip()
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
+    karta_sprites.draw(screen)
     clock.tick(fps)
 # выход
 pygame.quit()

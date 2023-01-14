@@ -51,7 +51,9 @@ class Ball(pygame.sprite.Sprite):
 
     # функция, осуществляющая перемещение шарика
     def update(self):
-        self.rect = self.rect.move(self.vx, self.vy)
+        if not self.is_paused:
+            self.rect = self.rect.move(self.vx, self.vy)
+
 
 # класс фона
 class Background(pygame.sprite.Sprite):
@@ -60,3 +62,32 @@ class Background(pygame.sprite.Sprite):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = 0, 0
+
+
+class Stena(pygame.sprite.Sprite):
+    def __init__(self, x, y, count_x, count_y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((16, 16))
+        pygame.draw.rect(self.image, (160, 54, 35), (0, 0, 15, 15))
+        pygame.draw.rect(self.image, pygame.Color('gray'), (0, 0, 16, 16), 1)
+        self.rect = self.image.get_rect()
+        self.rect.x = 15 * x + count_x
+        self.rect.y = 50 + 15 * y + count_y
+
+
+class Block(pygame.sprite.Sprite):
+    def __init__(self, x, y, hp, count_x, count_y):
+        pygame.sprite.Sprite.__init__(self)
+        self.hp = hp
+        if hp == 1:
+            self.image = pygame.Surface((15, 15))
+            pygame.draw.rect(self.image, (0, 225, 225), (0, 0, 15, 15))
+            self.rect = self.image.get_rect()
+            self.rect.x = 15 * x + count_x
+            self.rect.y = 50 + 15 * y + count_y
+        elif hp == 3:
+            self.image = pygame.Surface((15, 15))
+            pygame.draw.rect(self.image, (0, 255, 127), (0, 0, 15, 15))
+            self.rect = self.image.get_rect()
+            self.rect.x = 15 * x + count_x
+            self.rect.y = 50 + 15 * y + count_y
