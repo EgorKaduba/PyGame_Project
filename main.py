@@ -33,6 +33,10 @@ current_level = list_of_maps[0]
 star = pygame.transform.scale(load_image('star.png', -1), (100, 50))
 fon = pygame.transform.scale(load_image('fon2.jpg'), (750, 850))
 heart = pygame.transform.scale(load_image('heart.jpg', -1), (65, 47))
+# загрузка музыки
+pygame.mixer.music.load(os.path.join('data', "music.mp3"))
+pygame.mixer.music.play(-1)
+pygame.mouse.set_visible(False)
 # основной цикл игры
 while running:
     # перебор всех сигналов
@@ -64,8 +68,22 @@ while running:
                 board.right = True
             elif event.type == pygame.MOUSEMOTION:
                 board.update(event.pos[0])
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif (event.type == pygame.MOUSEBUTTONDOWN) or (event.type == pygame.KEYDOWN and event.key == pygame.K_t):
                 ball.is_paused = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                locals()
+                c = False
+                ball.rect.x = 370
+                ball.rect.y = 750
+                ball.vy = -2
+                ball.is_paused = True
+                score = '000'
+                dead = 0
+                for i in block_sprite:
+                    i.kill()
+                for i in stens_sprite:
+                    i.kill()
+                maps(current_level, stens_sprite, karta_sprites, block_sprite)
     if dvij:
         # проверка столкновений мячика с стенами
         ball.vx, ball.vy = collide_stena(ball, stens_sprite)
@@ -78,7 +96,7 @@ while running:
         board.update()
         # передвижение мячика
         ball.update()
-        # отображение жизней
+        # отображение жизней и счёта
         score_dead_count(dead, screen, heart, score, star)
         pygame.draw.line(screen, (128, 128, 128), (0, 47), (750, 47), 3)
         score, dead, current_level = win(screen, list_of_maps, block_sprite, current_level, ball, score, stens_sprite,

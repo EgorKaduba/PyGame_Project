@@ -167,7 +167,7 @@ def gameover(screens, clock, fps, ball, karta_sprites, stens_sprite, block_sprit
 
 
 def load_level(filename):
-    filename = "data/" + filename
+    filename = os.path.join('data', filename)
     # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
@@ -232,7 +232,7 @@ def collide_block(ball, block_sprite, score):
     hit = pygame.sprite.spritecollide(ball, block_sprite, False)
     for i in hit:
         if i.hp == 1:
-            score = scores(score)
+            score = scores(score, i.count)
             if pygame.sprite.spritecollideany(ball, block_sprite):
                 # находим dx(дельту пересечения по х) и dy(дельта пересечения по у)
                 if ball.vx > 0:
@@ -244,15 +244,19 @@ def collide_block(ball, block_sprite, score):
                 else:
                     dy = i.rect.bottom - ball.rect.top
                 # изменяем направление полета шарика
-                if abs(dx - dy) < 3:
+                if abs(dx - dy) < 5:
                     ball.vx = -2 if ball.vx > 0 else 2
                     ball.vy = -2 if ball.vy > 0 else 2
+                    i.kill()
+                    return ball.vx, ball.vy, score
                 elif dx > dy:
                     ball.vy = -2 if ball.vy > 0 else 2
+                    i.kill()
+                    return ball.vx, ball.vy, score
                 else:
                     ball.vx = -2 if ball.vx > 0 else 2
-                i.kill()
-            return ball.vx, ball.vy, score
+                    i.kill()
+                    return ball.vx, ball.vy, score
         else:
             i.hp -= 1
             if pygame.sprite.spritecollideany(ball, block_sprite):
@@ -269,11 +273,12 @@ def collide_block(ball, block_sprite, score):
                 if abs(dx - dy) < 5:
                     ball.vx = -2 if ball.vx > 0 else 2
                     ball.vy = -2 if ball.vy > 0 else 2
+                    return ball.vx, ball.vy, score
                 elif dx > dy:
                     ball.vy = -2 if ball.vy > 0 else 2
+                    return ball.vx, ball.vy, score
                 else:
                     ball.vx = -2 if ball.vx > 0 else 2
-            return ball.vx, ball.vy, score
     return ball.vx, ball.vy, score
 
 
@@ -293,11 +298,11 @@ def collide_stena(ball, stens_sprite):
             else:
                 dy = i.rect.bottom - ball.rect.top
             # изменяем направление полета шарика
-            if abs(dx - dy) < 5:
+            if abs(dx - dy) < 3:
                 ball.vx = -3 if ball.vx > 0 else 3
                 ball.vy = -1 if ball.vy > 0 else 1
                 return ball.vx, ball.vy
-            if dx > dy:
+            elif dx > dy:
                 ball.vy = -2 if ball.vy > 0 else 2
                 return ball.vx, ball.vy
             elif dx < dy:
@@ -306,13 +311,11 @@ def collide_stena(ball, stens_sprite):
     return ball.vx, ball.vy
 
 
-def scores(score):
-    if int(score) < 9:
-        score = f'00{str(int(score) + 1)}'
-    elif (int(score)) >= 9 and (int(score) < 99):
-        score = f'0{str(int(score) + 1)}'
-    else:
-        score = str(int(score) + 1)
+# счётчик очков
+def scores(score, count):
+    score = str(int(score) + count)
+    zero = 3 - len(score)
+    score = '0' * zero + score
     return score
 
 

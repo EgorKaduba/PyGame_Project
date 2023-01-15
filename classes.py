@@ -20,16 +20,14 @@ class Board(pygame.sprite.Sprite):
     def update(self, pos=0):
         if not self.is_paused:
             # проверяем, находится ли курсор мыши внутри экрана
-            mousefocus = pygame.mouse.get_focused()
             # если курсор не находится внутри экрана, перемещение происходит с помощью кнопок клавиатуры
             if pos == 0:
-                if not mousefocus:
-                    if self.rect.left >= 0:
-                        if self.left:
-                            self.rect = self.rect.move(-5, 0)
-                    if self.rect.right <= 750:
-                        if self.right:
-                            self.rect = self.rect.move(5, 0)
+                if self.rect.left >= 0:
+                    if self.left:
+                        self.rect = self.rect.move(-5, 0)
+                if self.rect.right <= 750:
+                    if self.right:
+                        self.rect = self.rect.move(5, 0)
             else:
                 self.rect.x = pos if pos < 690 else 690
 
@@ -64,6 +62,7 @@ class Background(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = 0, 0
 
 
+# класс стен
 class Stena(pygame.sprite.Sprite):
     def __init__(self, x, y, count_x, count_y):
         pygame.sprite.Sprite.__init__(self)
@@ -75,6 +74,7 @@ class Stena(pygame.sprite.Sprite):
         self.rect.y = 50 + 15 * y + count_y
 
 
+# класс блоков
 class Block(pygame.sprite.Sprite):
     def __init__(self, x, y, hp, count_x, count_y):
         pygame.sprite.Sprite.__init__(self)
@@ -85,9 +85,11 @@ class Block(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
             self.rect.x = 15 * x + count_x
             self.rect.y = 50 + 15 * y + count_y
+            self.count = 1
         elif hp == 3:
             self.image = pygame.Surface((15, 15))
             pygame.draw.rect(self.image, (0, 255, 127), (0, 0, 15, 15))
             self.rect = self.image.get_rect()
             self.rect.x = 15 * x + count_x
             self.rect.y = 50 + 15 * y + count_y
+            self.count = 2
