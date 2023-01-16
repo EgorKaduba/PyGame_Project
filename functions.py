@@ -1,5 +1,7 @@
 import os
 import sys
+import pygame
+
 from classes import *
 
 
@@ -327,6 +329,11 @@ def win(screen, list_of_maps, block_sprite, current_level, ball, score, stens_sp
     if current_level != list_of_maps[-1]:
         # если все блоки разбиты, выводим картинку с поздравлением
         if not len(block_sprite.sprites()):
+            text = 'Нажмите ENTER, чтобы начать новый уровень'
+            font = pygame.font.Font(None, 46)
+            str_ren = font.render(text, 1, pygame.Color('yellow'))
+            str_rect = str_ren.get_rect()
+            str_rect.top, str_rect.left = 550, 5
             # загружаем следующий уровень
             level_map = list_of_maps[list_of_maps.index(current_level) + 1]
             fon = pygame.Surface((750, 850), pygame.SRCALPHA, 32)
@@ -357,6 +364,7 @@ def win(screen, list_of_maps, block_sprite, current_level, ball, score, stens_sp
                         return score, 0, level_map
                 pygame.display.flip()
                 screen.blit(image, (30, -30))
+                screen.blit(str_ren, str_rect)
             return score, dead, level_map
     # если это последний уровень, проверяем, разбиты ли все блоки, выводим победную картинку
     else:

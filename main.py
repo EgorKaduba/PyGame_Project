@@ -90,6 +90,7 @@ while running:
                 c = False
                 ball.rect.x = 370
                 ball.rect.y = 750
+                ball.vx = choice([-2, 2])
                 ball.vy = -2
                 ball.is_paused = True
                 score = '000'
