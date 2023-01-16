@@ -341,8 +341,8 @@ def win(screen, list_of_maps, block_sprite, current_level, ball, score, stens_sp
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
-                    # если пользователь нажал на N, загружаем новый уровень и обновляем данные
-                    if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+                    # если пользователь нажал на Enter, загружаем новый уровень и обновляем данные
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         c = False
                         ball.rect.x = 370
                         ball.rect.y = 750

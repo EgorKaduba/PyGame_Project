@@ -1,3 +1,6 @@
+import pygame
+from pygame import mixer
+
 from functions import *
 
 # создаём группы спрайтов
@@ -27,15 +30,19 @@ fps = 150
 running = True
 dead = 0
 score = '000'
-list_of_maps = ['map.map']
+# список уровней
+list_of_maps = ['map.map', 'map_2.map']
 current_level = list_of_maps[0]
 # загрузка картинок
 star = pygame.transform.scale(load_image('star.png', -1), (100, 50))
 fon = pygame.transform.scale(load_image('fon2.jpg'), (750, 850))
 heart = pygame.transform.scale(load_image('heart.jpg', -1), (65, 47))
 # загрузка музыки
-pygame.mixer.music.load(os.path.join('data', "music.mp3"))
-pygame.mixer.music.play(-1)
+mixer.music.load(os.path.join('data', "music.mp3"))
+mixer.music.play(-1)
+# уровень громкости
+vol = 1.0
+# отключение отображения курсора
 pygame.mouse.set_visible(False)
 # основной цикл игры
 while running:
@@ -49,13 +56,20 @@ while running:
             if not start:
                 ball = Ball(ball_sprite)
                 board = Board(board_sprite, left, r)
-                maps('map.map', stens_sprite, karta_sprites, block_sprite)
+                maps(current_level, stens_sprite, karta_sprites, block_sprite)
                 start = True
                 dvij = True
                 all_sprites.add(Background(fon), board_sprite, ball_sprite)
                 ball.is_paused = True
         if dvij and (event.type == pygame.KEYDOWN and event.key == pygame.K_p):
             switch_paused(ball, board, screen)
+        # регулировка громкости музыки
+        if event.type == pygame.MOUSEWHEEL:
+            if event.y > 0:
+                vol = vol + 0.1 if vol < 1.0 else vol
+            elif event.y < 0:
+                vol = vol - 0.1 if vol > 0.0 else vol
+            mixer.music.set_volume(vol)
         # передвижение доски кнопками или мышкой
         if dvij:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
@@ -68,7 +82,8 @@ while running:
                 board.right = True
             elif event.type == pygame.MOUSEMOTION:
                 board.update(event.pos[0])
-            elif (event.type == pygame.MOUSEBUTTONDOWN) or (event.type == pygame.KEYDOWN and event.key == pygame.K_t):
+            elif (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 3)) or (
+                    event.type == pygame.KEYDOWN and event.key == pygame.K_t):
                 ball.is_paused = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 locals()
