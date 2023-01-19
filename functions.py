@@ -26,11 +26,9 @@ def load_image(name, color_key=None):
 # создание надписи перед началом игры
 def starts(screen):
     # загрузка киртинок
-    image = pygame.transform.scale(load_image('fon_start.jpg'), (750, 850))
-    image_text = load_image('text_start.png', -1)
+    image = pygame.transform.scale(load_image('fon_start.png'), (750, 850))
     # отрисовка картинок на экране
     screen.blit(image, (0, 0))
-    screen.blit(image_text, (0, -25))
 
 
 # функция, проверяющая столкновения мячика
